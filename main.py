@@ -1,7 +1,8 @@
 from fastapi import FastAPI , Depends , HTTPException 
-from database import create_db,get_session , User , select 
+from database import create_db,get_session , select 
+from models import User
 from sqlalchemy.ext.asyncio import AsyncSession 
-from model import Usercreate
+from schemas import Usercreate
 
 async def lifespan(app:FastAPI):
     await create_db()
@@ -27,4 +28,13 @@ async def create_user(user:Usercreate,db:AsyncSession=Depends(get_session)):
 async def get_user(username:str,db:AsyncSession=Depends(get_session)):
     user = await db.execute(select(User).where(User.name == username))
     user = user.scalars().all()
+    return user
+
+@app.post("/update_user/{username}")
+async def update_user(username:str,update:str,db:AsyncSession=Depends(get_session)):
+    user = await db.execute(select(User).where(User.name == username))
+    user = user.scalar_one_or_none()
+    user.name = update
+    await db.commit()
+    await db.refresh(user)
     return user

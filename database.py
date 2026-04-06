@@ -12,12 +12,6 @@ loaclsession = async_sessionmaker(engine,expire_on_commit=False)
 class Base(DeclarativeBase):
     pass
 
-class User(Base):
-    __tablename__ = 'users'
-    id = Column(String,primary_key=True,default=lambda:str(uuid4()))
-    name = Column(String,nullable=False)
-    age = Column(Integer,nullable=False)
-
 async def create_db():
     async with engine.begin() as conn:
       await conn.run_sync(Base.metadata.create_all)
